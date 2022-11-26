@@ -11,3 +11,5 @@ This is a blackjack game where you will draw cards until there is 21 or more. Th
 - You can stop by entering any other key
 - When prompt to stop, you will see their card and the game will determine who wins
 - You can restart by entering (start) again 
+
+![What is this](output-screenshot.png)
