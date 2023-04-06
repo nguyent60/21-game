@@ -6,7 +6,7 @@
 (newline)
 (display "Welcome to our humble blackjack game")
 (newline)
-(display "enter (start) to begin.")
+(display "enter start to begin.")
 (newline)
 
 (define (start)
