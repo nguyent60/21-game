@@ -14,25 +14,44 @@ font = pygame.font.SysFont("Arial", 32)
 # Define the colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+BLUE = (0, 0, 255)
+cards_owned = []
+bot1_owned = []
+bot2_owned = []
+bot3_owned = []
+
 
 # Define the start function
 def start():
-    global start_card
-    your_card = random.randint(1, 10)
-    start_card = your_card
-    window.blit(font.render("Let's start with " + str(your_card), True, BLACK), (50, 100))
-    game_check(take_card(your_card), opponent_card())
+    global your_total, bot1_total, your_last, bot1_last, bot2_last, your_count, bot1_count
+    your_last = 150
+    bot1_last = 400
+    bot2_last = 260
+    your_count = 0
+    bot1_count = 0
+    your_total = 0
+    bot1_total = 0
+    cards_owned.clear()
+    bot1_owned.clear()
+    cards_owned.append((window, BLACK, (your_last, 200, 30, 40)))
+    cards_owned.append((window, BLUE, (your_last + 5, 205, 20, 30)))
+    bot1_owned.append((window, BLACK, (bot1_last, 450, 30, 40)))
+    bot1_owned.append((window, BLUE, (bot1_last + 5, 455, 20, 30)))
+    draw_board()
 
 # Define the game check function
 def game_check(a: int, b: int):
     window.fill(WHITE)
-    window.blit(font.render("You have: " + str(a), True, BLACK), (50, 100))
-    window.blit(font.render("They have: " + str(b), True, BLACK), (50, 150))
-    if a > 21:
-        text = font.render("They win.", True, BLACK)
-        window.blit(text, (50, 200))
-    elif a == b:
+    window.blit(font.render("You have: " + str(a), True, BLACK), (20, 100))
+    window.blit(font.render("They have: " + str(b), True, BLACK), (20, 150))
+    if (a > 21 and b > 21) or a == b:
         text = font.render("It's a draw.", True, BLACK)
+        window.blit(text, (50, 200))
+    elif b > 21 or your_count == 5:
+        text = font.render("You win.", True, BLACK)
+        window.blit(text, (50, 200))
+    elif a > 21 and b <= 21:
+        text = font.render("They win.", True, BLACK)
         window.blit(text, (50, 200))
     elif a < b:
         text = font.render("They win.", True, BLACK)
@@ -50,28 +69,35 @@ def game_check(a: int, b: int):
     pygame.display.update()
 
 # Define the take card function
-def take_card(a: int):
+def draw_board():
+    global your_total, bot1_total, your_last, bot1_last, your_count, bot1_count
     window.fill(WHITE)
-    b = random.randint(1, 10)
-    window.blit(font.render("Let's start with " + str(start_card), True, BLACK), (50, 50))
-    window.blit(font.render("You draw: ", True, BLACK), (50, 100))
-    window.blit(font.render("Your card value now: ", True, BLACK), (50, 150))
-    pygame.draw.rect(window, BLACK, (170, 100, 30, 30))
-    pygame.draw.rect(window, BLACK, (310, 150, 30, 30))
+    window.blit(font.render("[d]: Draw card", True, BLACK), (20, 50))
+    window.blit(font.render("[c]: Stay", True, BLACK), (20, 100))
+    window.blit(font.render("You draw: ", True, BLACK), (20, 200))
+    window.blit(font.render("Total: ", True, BLACK), (20, 250))
+    for rect in cards_owned:
+        pygame.draw.rect(rect[0], rect[1], rect[2])
+    window.blit(font.render("Bot1 draws:", True, BLACK), (250, 450))
+    for rect in bot1_owned:
+        pygame.draw.rect(rect[0], rect[1], rect[2])
     pygame.display.update()
-    for i in range(10, 50):
-        pygame.draw.rect(window, WHITE, (170 + i-10, 100, 30, 30))
-        pygame.draw.rect(window, WHITE, (310 + i-10, 150, 30, 30))
-        pygame.draw.rect(window, BLACK, (170 + i, 100, 30, 30))
-        pygame.draw.rect(window, BLACK, (310 + i, 150, 30, 30))
+    last_card = cards_owned[-1]
+    card_dimension = last_card[2][0]
+    your_card = random.randint(1, 10)
+    bot1_card = random.randint(1, 10)
+    your_total += your_card
+    bot1_total += bot1_card
+    your_count += 1
+    bot1_count += 1
+    if bot1_total > 21:
+        bot1_total = random.randint(18, 22)
+    for iter in range(0, 50):
+        pygame.draw.rect(window, WHITE, (card_dimension + iter-10, 200, 5, 40))
         pygame.display.update()
         pygame.time.delay(10)
-    window.blit(font.render(str(b), True, BLACK), (200, 100))
-    window.blit(font.render(str(a + b), True, BLACK), (330, 150))
-    pygame.display.update()
-    window.blit(font.render("Opponent draws their card.", True, BLACK), (50, 200))
-    window.blit(font.render("Press [d] to draw next card", True, BLACK), (50, 300))
-    window.blit(font.render("Press [c] to check cards", True, BLACK), (50, 350))
+    window.blit(font.render(str(your_card), True, BLACK), (card_dimension, 200))
+    window.blit(font.render(str(your_total), True, BLACK), (130, 250))
     pygame.display.update()
     user_input = None
     while user_input not in ('d', 'c', pygame.QUIT):
@@ -81,16 +107,17 @@ def take_card(a: int):
                 return
             elif event.type == pygame.KEYDOWN:
                 if event.unicode == 'd':
-                    return take_card(a + b)
+                    your_last += 50
+                    bot1_last += 50
+                    cards_owned.append((window, BLACK, (your_last, 200, 30, 40)))
+                    cards_owned.append((window, BLUE, (your_last + 5, 205, 20, 30)))
+                    if bot1_total < 20 or bot1_count < 5:
+                        bot1_owned.append((window, BLACK, (bot1_last, 450, 30, 40)))
+                        bot1_owned.append((window, BLUE, (bot1_last + 5, 455, 20, 30)))
+                    draw_board()
                 elif event.unicode == 'c':
-                    game_check(a, opponent_card())
+                    game_check(your_total, bot1_total)
                 user_input = event.unicode
-
-    return int(a + b)
-
-# Define the opponent card function
-def opponent_card():
-    return random.randint(15, 21)
 
 # Game loop
 game_started = False
@@ -108,8 +135,8 @@ while running:
         window.fill(WHITE)
         # Draw the text
         window.blit(font.render("Welcome to our humble blackjack game", True, BLACK), (50, 50))
-        window.blit(font.render("Press [s] to start.", True, BLACK), (50, 300))
-        window.blit(font.render("Or Press [x] to quit the game", True, BLACK), (50, 350))
+        window.blit(font.render("[s] to start", True, BLACK), (50, 300))
+        window.blit(font.render("[x] to quit", True, BLACK), (50, 350))
 
         pygame.display.update()
 # Quit Pygame
