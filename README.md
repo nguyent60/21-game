@@ -13,4 +13,14 @@ This is a blackjack game where you will draw cards until there is 21 or more. Th
 - You can restart by entering s again 
 - You can press x at anytime to quit the game
 
-![What is this](game-screenshot.png)
+## Starting the program
+![Game Intro](game_ss1.png)
+
+## Gameplay
+![Game loop](game_ss2.png)
+
+## Checking cards
+![Game check](game_ss3.png)
+
+## Result Board
+![Print results](game_ss4.png)
